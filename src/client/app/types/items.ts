@@ -70,8 +70,13 @@ export enum UserRole {
 export interface Conversion {
 	source_id: number;
 	destination_id: number;
-	bidirectional: boolean;
+	bidirectional: ConversionBidirectional;
 	slope: number;
 	intercept: number;
 	note: string;
 }
+
+export enum ConversionBidirectional {
+	TRUE = 'true',
+	FALSE = 'false',
+};

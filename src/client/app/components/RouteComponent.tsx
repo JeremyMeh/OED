@@ -251,7 +251,7 @@ export default class RouteComponent extends React.Component<RouteProps, {}> {
 								<Route path='/editGroup' render={() => this.requireAuth(<EditGroupsContainer/>)}/>
 								<Route path='/users/new' render={() => this.requireAuth(<CreateUserContainer/>)}/>
 								<Route path='/users' render={() => this.requireAuth(<UsersDetailContainer fetchUsers={() => []}/>)}/>
-								<Route path='/con' render={() => this.requireAuth(<AdminConversionsContainer/>)}/>
+								<Route path='/conversions' render={() => this.requireAuth(<AdminConversionsContainer fetchConversions={() => []}/>)}/>
 								<Route path='*' component={HomeComponent}/>
 							</Switch>
 						</Router>

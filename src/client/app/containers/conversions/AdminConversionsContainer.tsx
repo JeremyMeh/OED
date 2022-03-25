@@ -8,6 +8,9 @@ import { Conversion, ConversionBidirectional } from '../../types/items';
 import AdminConversionsComponents from '../../components/conversions/AdminConversionsComponents';
 import HeaderContainer from '../HeaderContainer';
 import FooterContainer from '../FooterContainer';
+// import { showSuccessNotification, showErrorNotification } from '../../utils/notifications';
+import { conversionsApi } from '../../utils/api';
+// import translate from '../../utils/translate';
 
 
 interface AdminConversionsDisplayContainerProps {
@@ -22,6 +25,12 @@ interface AdminConversionsContainerState {
 export default class AdminConversionsContainer extends React.Component<AdminConversionsDisplayContainerProps, AdminConversionsContainerState> {
 	constructor(props: AdminConversionsDisplayContainerProps) {
 		super(props);
+		this.editConversion = this.editConversion.bind(this)
+		this.editBidirectional = this.editBidirectional.bind(this)
+		this.editSlope = this.editSlope.bind(this)
+		this.editIntercept = this.editIntercept.bind(this)
+		this.editNote = this.editNote.bind(this)
+
 	}
 
     state: AdminConversionsContainerState = {
@@ -29,24 +38,33 @@ export default class AdminConversionsContainer extends React.Component<AdminConv
 		history: []
     }
 
-	// private editConversion(source_id: number, newBidirectional: ConversionBidirectional, newSlope: number, newIntercept: number, newNote: string) {
-	// 	const newConversions = _.cloneDeep<Conversion[]>(this.state.conversions);
-	// 	const targetConversion = newConversions.find(conversion => conversion.source_id === source_id);
-	// 	if (targetConversion !== undefined) {
-	// 		targetConversion.bidirectional = newBidirectional;
-	// 		targetConversion.slope = newSlope;
-	// 		targetConversion.intercept = newIntercept;
-	// 		targetConversion.note = newNote;
-	// 		this.setState(prevState => ({
-	// 			conversions: newConversions,
-	// 			history: [...prevState.history, newConversions]
-	// 		}));
-	// 	}
-	// }
+	async componentDidMount() {
+		const conversions = await this.fetchConversions();
+		this.setState({ conversions, history: [_.cloneDeep<Conversion[]>(conversions)] });
+	}
 
-	private editBidirectional(source_id: number, newBidirectional: ConversionBidirectional) {
+	private async fetchConversions() {
+		return await conversionsApi.getAll();
+	}
+
+	private editConversion(sourceId: number, newBidirectional: ConversionBidirectional, newSlope: number, newIntercept: number, newNote: string) {
 		const newConversions = _.cloneDeep<Conversion[]>(this.state.conversions);
-		const targetConversion = newConversions.find(conversion => conversion.source_id === source_id);
+		const targetConversion = newConversions.find(conversion => conversion.sourceId === sourceId);
+		if (targetConversion !== undefined) {
+			targetConversion.bidirectional = newBidirectional;
+			targetConversion.slope = newSlope;
+			targetConversion.intercept = newIntercept;
+			targetConversion.note = newNote;
+			this.setState(prevState => ({
+				conversions: newConversions,
+				history: [...prevState.history, newConversions]
+			}));
+		}
+	}
+
+	private editBidirectional(sourceId: number, destinationId: number, newBidirectional: ConversionBidirectional) {
+		const newConversions = _.cloneDeep<Conversion[]>(this.state.conversions);
+		const targetConversion = newConversions.find(conversion => (conversion.sourceId === sourceId && conversion.destinationId === destinationId));
 		if (targetConversion !== undefined) {
 			targetConversion.bidirectional = newBidirectional;
 			this.setState(prevState => ({
@@ -56,9 +74,9 @@ export default class AdminConversionsContainer extends React.Component<AdminConv
 		}
 	}
 
-	private editSlope(source_id: number, newSlope: number) {
+	private editSlope(sourceId: number, destinationId: number, newSlope: number) {
 		const newConversions = _.cloneDeep<Conversion[]>(this.state.conversions);
-		const targetConversion = newConversions.find(conversion => conversion.source_id === source_id);
+		const targetConversion = newConversions.find(conversion => (conversion.sourceId === sourceId && conversion.destinationId === destinationId));
 		if (targetConversion !== undefined) {
 			targetConversion.slope = newSlope;
 			this.setState(prevState => ({
@@ -68,9 +86,9 @@ export default class AdminConversionsContainer extends React.Component<AdminConv
 		}
 	}
 
-	private editIntercept(source_id: number, newIntercept: number) {
+	private editIntercept(sourceId: number, destinationId: number, newIntercept: number) {
 		const newConversions = _.cloneDeep<Conversion[]>(this.state.conversions);
-		const targetConversion = newConversions.find(conversion => conversion.source_id === source_id);
+		const targetConversion = newConversions.find(conversion => (conversion.sourceId === sourceId && conversion.destinationId === destinationId));
 		if (targetConversion !== undefined) {
 			targetConversion.intercept = newIntercept;
 			this.setState(prevState => ({
@@ -80,9 +98,9 @@ export default class AdminConversionsContainer extends React.Component<AdminConv
 		}
 	}
 
-	private editNote(source_id: number, newNote: string) {
+	private editNote(sourceId: number, destinationId: number, newNote: string) {
 		const newConversions = _.cloneDeep<Conversion[]>(this.state.conversions);
-		const targetConversion = newConversions.find(conversion => conversion.source_id === source_id);
+		const targetConversion = newConversions.find(conversion => (conversion.sourceId === sourceId && conversion.destinationId === destinationId));
 		if (targetConversion !== undefined) {
 			targetConversion.note = newNote;
 			this.setState(prevState => ({
@@ -94,17 +112,17 @@ export default class AdminConversionsContainer extends React.Component<AdminConv
 
 	private async submitConversionEdits() {
 		// try {
-		// 	await conversionsApi.editConversions(this.state.conversions);
-		// 	showSuccessNotification(translate('users.successfully.edit.users')); // I have no clue what this does or how to make it th econversions form
+		// 	await conversionsApi.editConversion(sourceId, destinationId, bidirectional, slope, intercept, note);
+		// 	showSuccessNotification(translate('conversions.successfully.edit.conversions')); // I have no clue what this does or how to make it th econversions form
 		// 	this.setState(currentState => ({
 		// 		history: [_.cloneDeep<Conversion[]>(currentState.conversions)]
 		// 	}));
 		// } catch (error) {
-		// 	showErrorNotification(translate('users.failed.to.edit.users'));  // I have no clue what this does or how to make it th econversions form
+		// 	showErrorNotification(translate('conversions.failed.to.edit.conversions'));  // I have no clue what this does or how to make it th econversions form
 		// }
 	}
 
-	private async deleteConversion(source_id: number, destination_id: number) {
+	private async deleteConversion(sourceId: number, destinationId: number) {
 		// try {
 		// 	await usersApi.deleteUser(email);
 		// 	const users = await this.fetchUsers();
@@ -123,7 +141,7 @@ export default class AdminConversionsContainer extends React.Component<AdminConv
 					conversions = {this.state.conversions}
 					deleteConversion = {this.deleteConversion}
 					edited = {!_.isEqual(this.state.conversions, this.state.history[0])}
-					// editConversion = {this.editConversion}
+					editConversion = {this.editConversion}
 					editBidirectional = {this.editBidirectional}
 					editSlope = {this.editSlope}
 					editIntercept = {this.editIntercept}

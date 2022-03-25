@@ -16,12 +16,14 @@ interface AdminConversionsComponentProps {
     conversions: Conversion[];
 	deleteConversion: (source_id: number, destination_id: number) => Promise<void>;
 	edited: boolean;
-	// editConversion: (source_id: number, newBidirectional: ConversionBidirectional, newSlope: number, newIntercept: number, newNote: string) => void;
-    editBidirectional: (source_id: number, newBidirectional: ConversionBidirectional) => void;
-    editSlope: (source_id: number, newSlope: number) => void;
-    editIntercept: (source_id: number, newIntercept: number) => void;
-    editNote: (source_id: number, newNote: string) => void;
+	editConversion: (source_id: number, newBidirectional: ConversionBidirectional, newSlope: number, newIntercept: number, newNote: string) => void;
+    editBidirectional: (source_id: number, destinationId: number, newBidirectional: ConversionBidirectional) => void;
+    editSlope: (source_id: number, destinationId: number, newSlope: number) => void;
+    editIntercept: (source_id: number, destinationId: number, newIntercept: number) => void;
+    editNote: (source_id: number, destinationId: number, newNote: string) => void;
 	submitConversionEdits: () => Promise<void>;
+
+    // sourceId:string, destinationId: string, bidirectional:ConversionBidirectional, slope:number, intercept:number, note:string
 }
 
 //source_id, dest_id, bidirection, slope, intercept, note
@@ -62,10 +64,10 @@ function AdminConversionsComponents(props: AdminConversionsComponentProps) {
         marginRight: '10%'
     };
 
-    const buttonsStyle: React.CSSProperties = {
-        display: 'flex',
-        justifyContent: 'space-between'
-    }
+    // const buttonsStyle: React.CSSProperties = {
+    //     display: 'flex',
+    //     justifyContent: 'space-between'
+    // }
 
     const tooltipStyle = {
         display: 'inline-block',
@@ -78,9 +80,9 @@ function AdminConversionsComponents(props: AdminConversionsComponentProps) {
             <TooltipHelpContainerAlternative page='users' />
             <div className='container-fluid'>
                 <h2 style={titleStyle}>
-                    <FormattedMessage id='users'/>
+                    <FormattedMessage id='Conversions'/>
                     <div style={tooltipStyle}>
-                        <TooltipMarkerComponent page='users' helpTextId='help.admin.user' />
+                        <TooltipMarkerComponent page='users' helpTextId='help.admin.conversions' />
                     </div>
                 </h2>
                 <div style={tableStyle}>
@@ -97,15 +99,15 @@ function AdminConversionsComponents(props: AdminConversionsComponentProps) {
                         </thead>
                         <tbody>
                             {props.conversions.map(conversion => (
-                                <tr key={conversion.source_id}>
-                                    <td>{conversion.source_id}</td>
-                                    <td>{conversion.destination_id}</td>
+                                <tr key={conversion.sourceId}>
+                                    <td>{conversion.sourceId}</td>
+                                    <td>{conversion.destinationId}</td>
                                     <td>
                                         <Input
                                             type='select'
                                             value={conversion.bidirectional}
                                             onChange={({ target }) => {
-                                                props.editBidirectional(conversion.source_id, conversion.bidirectional);
+                                                props.editBidirectional(conversion.sourceId, conversion.destinationId, target.value as ConversionBidirectional);
                                                 addUnsavedChanges();
                                             }}
                                         >
@@ -119,7 +121,7 @@ function AdminConversionsComponents(props: AdminConversionsComponentProps) {
                                             type='number'
                                             value={conversion.slope}
                                             onChange={({ target }) => {
-                                                props.editSlope(conversion.source_id, conversion.slope);
+                                                props.editSlope(conversion.sourceId, conversion.destinationId, +target.value as number);
                                                 addUnsavedChanges();
                                             }}
                                         >
@@ -130,7 +132,7 @@ function AdminConversionsComponents(props: AdminConversionsComponentProps) {
                                             type='number'
                                             value={conversion.intercept}
                                             onChange={({ target }) => {
-                                                props.editIntercept(conversion.source_id, conversion.intercept);
+                                                props.editIntercept(conversion.sourceId, conversion.destinationId, +target.value as number);
                                                 addUnsavedChanges();
                                             }}
                                         >
@@ -141,19 +143,27 @@ function AdminConversionsComponents(props: AdminConversionsComponentProps) {
                                             type='text'
                                             value={conversion.note}
                                             onChange={({ target }) => {
-                                                props.editNote(conversion.source_id, conversion.note);
+                                                props.editNote(conversion.sourceId, conversion.destinationId, target.value as string);
                                                 addUnsavedChanges();
                                             }}
                                         >
                                         </Input>
                                     </td>
-                                     <td>
-                                        <Button color='danger' onClick={() => { props.deleteConversion(conversion.source_id, conversion.destination_id); }}>
-                                            <FormattedMessage id='delete.component'/>
+                                    <td>
+                                        <Button color='success' disabled={!props.edited} onClick={() => { 
+                                            props.submitConversionEdits(
+                                                // conversion.sourceId.toString(),
+                                                // conversion.destinationId.toString(),
+                                                // conversion.bidirectional,
+                                                // conversion.slope,
+                                                // conversion.intercept,
+                                                // conversion.note
+                                                ); clearUnsavedChanges(); }}>
+                                            <FormattedMessage id='update.component'/>
                                         </Button>
                                     </td>
                                     <td>
-                                        <Button color='danger' onClick={() => { props.deleteConversion(conversion.source_id, conversion.destination_id); }}>
+                                        <Button color='danger' onClick={() => { props.deleteConversion(conversion.sourceId, conversion.destinationId); }}>
                                             <FormattedMessage id='delete.component'/>
                                         </Button>
                                     </td>
@@ -161,8 +171,8 @@ function AdminConversionsComponents(props: AdminConversionsComponentProps) {
                             ))}
                         </tbody>
                     </Table>
-                    <div style={buttonsStyle}>
-                        {/* <CreateUserLinkButtonComponent /> // we need to make our own one of these */}
+                    {/* <div style={buttonsStyle}>
+                        <CreateUserLinkButtonComponent /> // we need to make our own one of these
                         <Button
 							color='success'
 							disabled={!props.edited}
@@ -173,7 +183,7 @@ function AdminConversionsComponents(props: AdminConversionsComponentProps) {
 						>
 							<FormattedMessage id='save.role.changes'/>
 						</Button>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </div>

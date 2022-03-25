@@ -68,8 +68,8 @@ export enum UserRole {
  * A conversion object to be displayed for admin.
  */
 export interface Conversion {
-	source_id: number;
-	destination_id: number;
+	sourceId: number;
+	destinationId: number;
 	bidirectional: ConversionBidirectional;
 	slope: number;
 	intercept: number;

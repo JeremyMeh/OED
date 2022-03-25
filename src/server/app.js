@@ -30,6 +30,7 @@ const maps = require('./routes/maps');
 const logs = require('./routes/logs');
 const obvius = require('./routes/obvius');
 const csv = require('./routes/csv');
+const conversions = require('./routes/conversions');
 
 // Limit the rate of overall requests to OED
 // Note that the rate limit may make the automatic test return the value of 429. In that case, the limiters below need to be increased.
@@ -76,11 +77,13 @@ app.use('/api/logs', logs);
 app.use('/api/timezones', timezones);
 app.use('/api/obvius', obvius);
 app.use('/api/csv', csv);
+app.use('/api/csv', csv);
+app.use('/api/conversions', conversions);
 app.use(express.static(path.join(__dirname, '..', 'client', 'public')));
 
 const router = express.Router();
 
-router.get(/^(\/)(login|admin|groups|createGroup|editGroup|graph|meters|editMeter|maps|calibration|users|csv|con)?$/, (req, res) => {
+router.get(/^(\/)(login|admin|groups|createGroup|editGroup|graph|meters|editMeter|maps|calibration|users|csv|conversions)?$/, (req, res) => {
 	fs.readFile(path.resolve(__dirname, '..', 'client', 'index.html'), (err, html) => {
 		const subdir = config.subdir || '/';
 		let htmlPlusData = html.toString().replace('SUBDIR', subdir);

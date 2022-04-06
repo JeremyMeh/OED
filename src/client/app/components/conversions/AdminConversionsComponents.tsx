@@ -4,13 +4,15 @@
  
 import * as React from 'react';
 import { Conversion, ConversionBidirectional } from '../../types/items';
-import { Button, Input, Table } from 'reactstrap';
+import { Button, Input } from 'reactstrap';
 import TooltipHelpContainerAlternative from '../../containers/TooltipHelpContainerAlternative';
 import TooltipMarkerComponent from '../TooltipMarkerComponent';
 import { FormattedMessage } from 'react-intl';
 import UnsavedWarningContainer from '../../containers/UnsavedWarningContainer';
 import { updateUnsavedChanges, removeUnsavedChanges } from '../../actions/unsavedWarning';
 import store from '../../index'
+import { Card, Row, Modal } from 'react-bootstrap'
+import { useState } from "react";
 
 interface AdminConversionsComponentProps {
     conversions: Conversion[];
@@ -31,27 +33,27 @@ interface AdminConversionsComponentProps {
 function AdminConversionsComponents(props: AdminConversionsComponentProps) {
     
 
-    const removeUnsavedChangesFunction = (callback: () => void) => {
-		// This function is called to reset all the inputs to the initial state
-		// Do not need to do anything since unsaved changes will be removed after leaving this page
-		callback();
-	}
+    // const removeUnsavedChangesFunction = (callback: () => void) => {
+	// 	// This function is called to reset all the inputs to the initial state
+	// 	// Do not need to do anything since unsaved changes will be removed after leaving this page
+	// 	callback();
+	// }
 
-    const submitUnsavedChangesFunction = (successCallback: () => void, failureCallback: () => void) => {
-		// This function is called to submit the unsaved changes
-		props.submitConversionEdits().then(successCallback, failureCallback);
-	}
+    // const submitUnsavedChangesFunction = (successCallback: () => void, failureCallback: () => void) => {
+	// 	// This function is called to submit the unsaved changes
+	// 	props.submitConversionEdits().then(successCallback, failureCallback);
+	// }
 
 
-    const addUnsavedChanges = () => {
-		// Notify that there are unsaved changes
-		store.dispatch(updateUnsavedChanges(removeUnsavedChangesFunction, submitUnsavedChangesFunction));
-	}
+    // const addUnsavedChanges = () => {
+	// 	// Notify that there are unsaved changes
+	// 	store.dispatch(updateUnsavedChanges(removeUnsavedChangesFunction, submitUnsavedChangesFunction));
+	// }
 
-    const clearUnsavedChanges = () => {
-		// Notify that there are no unsaved changes
-		store.dispatch(removeUnsavedChanges());
-	}
+    // const clearUnsavedChanges = () => {
+	// 	// Notify that there are no unsaved changes
+	// 	store.dispatch(removeUnsavedChanges());
+	// }
 
 
     
@@ -67,7 +69,13 @@ function AdminConversionsComponents(props: AdminConversionsComponentProps) {
     // const buttonsStyle: React.CSSProperties = {
     //     display: 'flex',
     //     justifyContent: 'space-between'
-    // }
+    // };
+
+    const cardStyle: React.CSSProperties = {
+        width: '20%',
+        margin: '5px 5px 5px 5px',
+        textAlign: 'center',
+    };
 
     const tooltipStyle = {
         display: 'inline-block',
@@ -86,108 +94,184 @@ function AdminConversionsComponents(props: AdminConversionsComponentProps) {
                     </div>
                 </h2>
                 <div style={tableStyle}>
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th> <FormattedMessage id='source id'/> </th>
-                                <th> <FormattedMessage id='destination id'/> </th>
-                                <th> <FormattedMessage id='bidirectional'/> </th>
-                                <th> <FormattedMessage id='slope'/> </th>
-                                <th> <FormattedMessage id='intercept'/> </th>
-                                <th> <FormattedMessage id='note'/> </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {props.conversions.map(conversion => (
-                                <tr key={conversion.sourceId}>
-                                    <td>{conversion.sourceId}</td>
-                                    <td>{conversion.destinationId}</td>
-                                    <td>
-                                        <Input
-                                            type='select'
-                                            value={conversion.bidirectional}
-                                            onChange={({ target }) => {
-                                                props.editBidirectional(conversion.sourceId, conversion.destinationId, target.value as ConversionBidirectional);
-                                                addUnsavedChanges();
-                                            }}
-                                        >
-                                            {Object.entries(ConversionBidirectional).map(([bidirectional, val]) => (
-                                                <option value={val} key={bidirectional}> {bidirectional} </option>
-                                            ))}
-                                        </Input>
-                                    </td>
-                                    <td>
-                                        <Input
-                                            type='number'
-                                            value={conversion.slope}
-                                            onChange={({ target }) => {
-                                                props.editSlope(conversion.sourceId, conversion.destinationId, +target.value as number);
-                                                addUnsavedChanges();
-                                            }}
-                                        >
-                                        </Input>
-                                    </td>
-                                    <td>
-                                        <Input
-                                            type='number'
-                                            value={conversion.intercept}
-                                            onChange={({ target }) => {
-                                                props.editIntercept(conversion.sourceId, conversion.destinationId, +target.value as number);
-                                                addUnsavedChanges();
-                                            }}
-                                        >
-                                        </Input>
-                                    </td>
-                                    <td>
-                                        <Input
-                                            type='text'
-                                            value={conversion.note}
-                                            onChange={({ target }) => {
-                                                props.editNote(conversion.sourceId, conversion.destinationId, target.value as string);
-                                                addUnsavedChanges();
-                                            }}
-                                        >
-                                        </Input>
-                                    </td>
-                                    <td>
-                                        <Button color='success' disabled={!props.edited} onClick={() => { 
-                                            props.submitConversionEdits(
-                                                // conversion.sourceId.toString(),
-                                                // conversion.destinationId.toString(),
-                                                // conversion.bidirectional,
-                                                // conversion.slope,
-                                                // conversion.intercept,
-                                                // conversion.note
-                                                ); clearUnsavedChanges(); }}>
-                                            <FormattedMessage id='update.component'/>
-                                        </Button>
-                                    </td>
-                                    <td>
-                                        <Button color='danger' onClick={() => { props.deleteConversion(conversion.sourceId, conversion.destinationId); }}>
-                                            <FormattedMessage id='delete.component'/>
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </Table>
-                    {/* <div style={buttonsStyle}>
-                        <CreateUserLinkButtonComponent /> // we need to make our own one of these
-                        <Button
-							color='success'
-							disabled={!props.edited}
-							onClick={() => {
-								props.submitConversionEdits();
-								clearUnsavedChanges();
-							}}
-						>
-							<FormattedMessage id='save.role.changes'/>
-						</Button>
-                    </div> */}
+                    <Row xs={1} sm={3} md={4} lg={5} xl={5} className="g-4" style={{ justifyContent: 'center' }}>
+                        <Card style={cardStyle} className='align-items-center justify-content-center'>
+                            <Button style={{ backgroundColor: 'blue', margin: '0px 5px 5px 5px'}}>
+                                Create New Conversion
+                            </Button>
+                        </Card>
+                        {props.conversions.map(conversion => (
+                            <Card style={cardStyle}>
+                                <Card.Title style={{ margin: '5px 0px 5px 0px'}}>
+                                    <span style={{ padding: '0px 0px 5px 0px'}}>
+                                        Source Id: {conversion.sourceId} <br/>
+                                    </span>
+                                    <span>
+                                        Destination Id: {conversion.destinationId}
+                                    </span>
+                                </Card.Title>
+                                <Card.Text>
+                                    Bidirectional: {conversion.bidirectional}
+                                </Card.Text>
+                                <Card.Text>
+                                    Slope: {conversion.slope}
+                                </Card.Text>
+                                <Card.Text>
+                                    Intercept: {conversion.intercept}
+                                </Card.Text>
+                                <Card.Text>
+                                    Note: {conversion.note}
+                                </Card.Text>
+                                {EditModalCard(conversion, props)}
+                                <Button style={{ backgroundColor: 'red', margin: '0px 5px 5px 5px' }}>
+                                    Delete
+                                </Button>
+                            </Card>
+                        ))}
+                    </Row>
                 </div>
             </div>
         </div>
     )
 }
+
+function EditModalCard(conversion: Conversion, props: AdminConversionsComponentProps) {
+    const [showModal, setShow] = useState(false);
+  
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+    const removeUnsavedChangesFunction = (callback: () => void) => {
+		// This function is called to reset all the inputs to the initial state
+		// Do not need to do anything since unsaved changes will be removed after leaving this page
+		callback();
+	}
+
+    const submitUnsavedChangesFunction = (successCallback: () => void, failureCallback: () => void) => {
+		// This function is called to submit the unsaved changes
+		props.submitConversionEdits().then(successCallback, failureCallback);
+	}
+
+    const addUnsavedChanges = () => {
+		// Notify that there are unsaved changes
+		store.dispatch(updateUnsavedChanges(removeUnsavedChangesFunction, submitUnsavedChangesFunction));
+	}
+
+    const clearUnsavedChanges = () => {
+		// Notify that there are no unsaved changes
+		store.dispatch(removeUnsavedChanges());
+	}
+  
+    return (
+        <>
+            <Button onClick={handleShow} style={{ backgroundColor: 'blue', margin: '0px 5px 5px 5px'}}>
+                Edit Conversion
+            </Button>
+            
+            <Modal show={showModal} onHide={handleClose}>
+                <Modal.Header>
+                    <Modal.Title> Edit Conversion Information</Modal.Title>
+                </Modal.Header>
+    
+                <Modal.Body className="show-grid">
+                    <div id="container">
+                        <div id="modalChild">
+                            <div>
+                                Source Id: {conversion.sourceId}
+                            </div>
+
+                            <div>
+                                Destination Id: {conversion.destinationId}
+                            </div>
+                            
+                            <div>
+                                Bidirectional:
+                                <span>
+                                    <Input
+                                        type='select'
+                                        value={conversion.bidirectional}
+                                        onChange={({ target }) => {
+                                            props.editBidirectional(conversion.sourceId, conversion.destinationId, target.value as ConversionBidirectional);
+                                            addUnsavedChanges();
+                                        }}
+                                        >
+                                        {Object.entries(ConversionBidirectional).map(([bidirectional, val]) => (
+                                            <option value={val} key={bidirectional}> {bidirectional} </option>
+                                        ))}
+                                    </Input>
+                                </span>
+                            </div>
+
+                            <div>
+                                Slope:
+                                <span>
+                                    <Input
+                                        type='number'
+                                        value={conversion.slope}
+                                        onChange={({ target }) => {
+                                            props.editSlope(conversion.sourceId, conversion.destinationId, +target.value as number);
+                                            addUnsavedChanges();
+                                        }}
+                                    >
+                                    </Input>
+                                </span>
+                            </div>
+
+                            <div>
+                                Intercept:
+                                <span>
+                                    <Input
+                                        type='number'
+                                        value={conversion.intercept}
+                                        onChange={({ target }) => {
+                                            props.editIntercept(conversion.sourceId, conversion.destinationId, +target.value as number);
+                                            addUnsavedChanges();
+                                        }}
+                                    >
+                                    </Input>
+                                </span>
+                            </div>
+
+                            <div>
+                                Note:
+                                <Input
+                                    type='text'
+                                    value={conversion.note}
+                                    onChange={({ target }) => {
+                                        props.editNote(conversion.sourceId, conversion.destinationId, target.value as string);
+                                        addUnsavedChanges();
+                                    }}
+                                >
+                                </Input>
+                            </div>
+                        </div>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Close
+                    </Button>
+                    <Button variant="primary" color="success" disabled={!props.edited}
+                    onClick={() => {
+                        props.submitConversionEdits(
+                            // conversion.sourceId,
+                            // conversion.destinationId,
+                            // conversion.bidirectional,
+                            // conversion.slope,
+                            // conversion.intercept,
+                            // conversion.note
+                        );
+                        props.submitConversionEdits();
+                        clearUnsavedChanges();
+                        handleClose
+                    }}
+                    >
+                        Save Changes
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </>
+    );
+  }
 
 export default AdminConversionsComponents;

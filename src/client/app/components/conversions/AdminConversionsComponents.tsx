@@ -85,7 +85,7 @@ function AdminConversionsComponents(props: AdminConversionsComponentProps) {
     return (
         <div>
             <UnsavedWarningContainer />
-            <TooltipHelpContainerAlternative page='users' />
+            <TooltipHelpContainerAlternative page='conversions' />
             <div className='container-fluid'>
                 <h2 style={titleStyle}>
                     <FormattedMessage id='Conversions'/>
